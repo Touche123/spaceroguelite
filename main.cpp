@@ -1,45 +1,106 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <sstream>
+
+#include "src/player.h"
+#include "src/enemy.h"
+
+sf::Clock deltaClock;
+sf::Time dt;
+std::vector<Enemy> enemies;
+void SpawnEnemy(const sf::Window& window);
 
 int main() {
+   
+  Player player;
+
   sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
-  sf::CircleShape rectile(100.f);
-  sf::RectangleShape playerShape(sf::Vector2f(50, 50));
-  rectile.setFillColor(sf::Color::Green);
-  rectile.setOrigin(100.f, 100.f);
-  sf::Vector2f playerDirection = sf::Vector2f(0, 0);
-  sf::Vector2f playerPosition = sf::Vector2f(50, 50);
+  window.setMouseCursorVisible(false);
+  sf::Font font;
+  sf::Text textDelta;
+
+  if (!font.loadFromFile("assets/fonts/TitilliumWeb-Regular.ttf"))
+    std::cout << "error" << std::endl;
+
+  textDelta.setPosition(0.0f, 0.0f);
+  textDelta.setFont(font);
+  textDelta.setString("Thest");
+  textDelta.setCharacterSize(24);
+  textDelta.setFillColor(sf::Color::Red);
+  textDelta.setStyle(sf::Text::Bold);
+
+  enemies.push_back(Enemy());
 
   while (window.isOpen()) {
     sf::Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed)
-        window.close();
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::A))
-          playerDirection.x = -1;
-      else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::D))
-          playerDirection.x = 1;
-      else
-          playerDirection.x = 0;
+    dt = deltaClock.restart();
 
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::W))
-          playerDirection.y = -1;
-      else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::S))
-          playerDirection.y = 1;
-      else
-          playerDirection.y = 0;
+    player.update(window, dt.asSeconds());
+
+    std::ostringstream ss;
+    ss << "Deltatime: " << dt.asSeconds();
+    textDelta.setString(ss.str());
+
+    while (window.pollEvent(event)) {
+      if (event.type == sf::Event::Closed ||
+          sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::Escape))
+        window.close();
     }
-    playerPosition.x += playerDirection.x * 0.01;
-    playerPosition.y += playerDirection.y * 0.01;
+
+    // Iterate over all the projectiles and enemies.
+    // Subract the damage from the healt of the enemy. And destroy accordingly.
+    for (size_t i = 0; i < player.Projectiles.size(); i++) {
+        for (size_t j = 0; j < enemies.size(); j++) {
+            if (player.Projectiles[i].sprite.getGlobalBounds().intersects(enemies[j].sprite.getGlobalBounds())) {
+                enemies[j].life -= player.Projectiles[i].damage;
+                if (enemies[j].life < 0.f)
+                    enemies.erase(enemies.begin() + j);
+                player.Projectiles.erase(player.Projectiles.begin() + i);
+                i--;
+                break;
+            }
+        }
+    }
+
+    if (enemies.size() <= 0)
+        SpawnEnemy(window);
 
     window.clear();
-    sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-    rectile.setPosition(localPosition.x, localPosition.y);
+    
+    window.draw(player.sprite);
+    window.draw(player.rectile);
+    
+    for (auto const& enemy: enemies) {
+        window.draw(enemy.sprite);
+    }
 
-    playerShape.setPosition(playerPosition.x, playerPosition.y);
-    window.draw(rectile);
-    window.draw(playerShape);
+    for (auto const &projectile : player.Projectiles)
+    {
+        window.draw(projectile.sprite);
+    }
+    
+    window.draw(textDelta);
     window.display();
   }
 
   return 0;
+}
+
+void SpawnEnemy(const sf::Window& window)
+{
+    // Spawn an enemy at a random position
+    for (int i = 0; i < 5; ++i)
+    { // Spawning 5 random enemies
+        Enemy enemy; // Create an enemy of size 50x50
+       
+        // 1. Generate random position within the window's bounds
+        float randomX = static_cast<float>(std::rand() % (window.getSize().x - static_cast<int>(enemy.sprite.getSize().x)));
+        float randomY = static_cast<float>(std::rand() % (window.getSize().y - static_cast<int>(enemy.sprite.getSize().y)));
+
+        // 2. Set the enemy's position to the random coordinates
+        enemy.sprite.setPosition(randomX, randomY);
+
+        // 3. Add enemy to the list of enemies
+        enemies.push_back(enemy);
+    }
 }
