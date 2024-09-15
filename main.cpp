@@ -49,18 +49,30 @@ int main() {
     // Iterate over all the projectiles and enemies.
     // Subract the damage from the healt of the enemy. And destroy accordingly.
     for (size_t i = 0; i < player.projectiles.size(); i++) {
-        for (size_t j = 0; j < enemies.size(); j++) {
-            if (player.projectiles[i].sprite.getGlobalBounds().intersects(enemies[j].sprite.getGlobalBounds())) {
+        for (size_t j = 0; j < enemies.size(); j++)
+        {
+            if (player.projectiles[i].sprite.getGlobalBounds().intersects(enemies[j].sprite.getGlobalBounds()))
+            {
                 enemies[j].life -= player.projectiles[i].damage;
-                if (enemies[j].life < 0.f) {
+                if (enemies[j].life < 0.f)
+                {
                     Item item;
                     item.setPosition(enemies[j].sprite.getPosition());
                     items.push_back(item);
                     enemies.erase(enemies.begin() + j);
                 }
-                    
+
                 player.projectiles.erase(player.projectiles.begin() + i);
                 i--;
+                break;
+            }
+            
+            if (player.projectiles[i].position.x < 0
+                || player.projectiles[i].position.x > window.getSize().x
+                || player.projectiles[i].position.y < 0
+                || player.projectiles[i].position.y > window.getSize().y)
+            {
+                player.projectiles.erase(player.projectiles.begin() + i);
                 break;
             }
         }
@@ -69,6 +81,10 @@ int main() {
     for (size_t i = 0; i < items.size(); i++) {
         if (items[i].sprite.getGlobalBounds().intersects(player.sprite.getGlobalBounds())) {
             player.firerate -= 0.01f;
+
+            if (player.firerate < 0.05f)
+                player.firerate = 0.05f;
+            
             items.erase(items.begin() + i);
             i--;
             break;
