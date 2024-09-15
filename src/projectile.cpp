@@ -31,3 +31,8 @@ void Projectile::update(float dt)
 	
 	sprite.setPosition(position);
 }
+
+void Projectile::draw(sf::RenderWindow& window)
+{
+	window.draw(sprite);
+}

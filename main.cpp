@@ -4,42 +4,39 @@
 
 #include "src/player.h"
 #include "src/enemy.h"
+#include "src/item.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
 std::vector<Enemy> enemies;
+std::vector<Item> items;
+
 void SpawnEnemy(const sf::Window& window);
 
 int main() {
-   
-  Player player;
-
   sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
   window.setMouseCursorVisible(false);
   sf::Font font;
-  sf::Text textDelta;
-
   if (!font.loadFromFile("assets/fonts/TitilliumWeb-Regular.ttf"))
     std::cout << "error" << std::endl;
 
-  textDelta.setPosition(0.0f, 0.0f);
-  textDelta.setFont(font);
-  textDelta.setString("Thest");
-  textDelta.setCharacterSize(24);
-  textDelta.setFillColor(sf::Color::Red);
-  textDelta.setStyle(sf::Text::Bold);
+  sf::Text text_delta;
+  text_delta.setPosition(0.0f, 0.0f);
+  text_delta.setFont(font);
+  text_delta.setString("Thest");
+  text_delta.setCharacterSize(24);
+  text_delta.setFillColor(sf::Color::Red);
+  text_delta.setStyle(sf::Text::Bold);
 
-  enemies.push_back(Enemy());
+  Player player;
 
   while (window.isOpen()) {
     sf::Event event;
     dt = deltaClock.restart();
 
-    player.update(window, dt.asSeconds());
-
     std::ostringstream ss;
     ss << "Deltatime: " << dt.asSeconds();
-    textDelta.setString(ss.str());
+    text_delta.setString(ss.str());
 
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed ||
@@ -47,18 +44,34 @@ int main() {
         window.close();
     }
 
+    player.update(window, dt.asSeconds());
+
     // Iterate over all the projectiles and enemies.
     // Subract the damage from the healt of the enemy. And destroy accordingly.
-    for (size_t i = 0; i < player.Projectiles.size(); i++) {
+    for (size_t i = 0; i < player.projectiles.size(); i++) {
         for (size_t j = 0; j < enemies.size(); j++) {
-            if (player.Projectiles[i].sprite.getGlobalBounds().intersects(enemies[j].sprite.getGlobalBounds())) {
-                enemies[j].life -= player.Projectiles[i].damage;
-                if (enemies[j].life < 0.f)
+            if (player.projectiles[i].sprite.getGlobalBounds().intersects(enemies[j].sprite.getGlobalBounds())) {
+                enemies[j].life -= player.projectiles[i].damage;
+                if (enemies[j].life < 0.f) {
+                    Item item;
+                    item.setPosition(enemies[j].sprite.getPosition());
+                    items.push_back(item);
                     enemies.erase(enemies.begin() + j);
-                player.Projectiles.erase(player.Projectiles.begin() + i);
+                }
+                    
+                player.projectiles.erase(player.projectiles.begin() + i);
                 i--;
                 break;
             }
+        }
+    }
+
+    for (size_t i = 0; i < items.size(); i++) {
+        if (items[i].sprite.getGlobalBounds().intersects(player.sprite.getGlobalBounds())) {
+            player.firerate -= 0.01f;
+            items.erase(items.begin() + i);
+            i--;
+            break;
         }
     }
 
@@ -67,19 +80,22 @@ int main() {
 
     window.clear();
     
-    window.draw(player.sprite);
-    window.draw(player.rectile);
+    player.draw(window);
     
-    for (auto const& enemy: enemies) {
-        window.draw(enemy.sprite);
+    for (auto& enemy: enemies) {
+        enemy.draw(window);
     }
 
-    for (auto const &projectile : player.Projectiles)
+    for (auto& item : items)
     {
-        window.draw(projectile.sprite);
+        item.draw(window);
+    }
+
+    for (auto& projectile : player.projectiles) {
+        projectile.draw(window);
     }
     
-    window.draw(textDelta);
+    window.draw(text_delta);
     window.display();
   }
 

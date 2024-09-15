@@ -59,7 +59,7 @@ void Player::updateWeapons(float dt)
 			if (magnitude != 0)
 				direction /= magnitude;
 			
-			Projectiles.push_back(Projectile(position, direction));
+			projectiles.push_back(Projectile(position, direction));
 			fire_cooldown = firerate;
 		}
 	}
@@ -69,11 +69,11 @@ void Player::updateWeapons(float dt)
 			fire_cooldown = 0.f;
 	}
 
-	for (auto &projectile : Projectiles) {
+	for (auto &projectile : projectiles) {
 		projectile.update(dt);
 	}
 
-	std::erase_if(Projectiles, [](Projectile const& p) { return !p.is_alive; });
+	std::erase_if(projectiles, [](Projectile const& p) { return !p.is_alive; });
 }
 
 Player::Player()
@@ -87,5 +87,11 @@ Player::Player()
 	rectile.setOrigin(20.f, 20.f);
 
 	firerate = 0.2f;
+}
+
+void Player::draw(sf::RenderWindow& window)
+{
+	window.draw(sprite);
+	window.draw(rectile);
 }
 

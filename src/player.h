@@ -22,9 +22,10 @@ public:
 	sf::RectangleShape sprite;
 	sf::CircleShape rectile;
 	
-	std::vector<Projectile> Projectiles;
+	std::vector<Projectile> projectiles;
 
 	Player();
 	void update(sf::Window& window, float dt);
 	void updateWeapons(float dt);
+	void draw(sf::RenderWindow& window);
 };

@@ -19,4 +19,5 @@ public:
 
 	Projectile(sf::Vector2f position, sf::Vector2f direction);
 	void update(float dt);
+	void draw(sf::RenderWindow& window);
 };

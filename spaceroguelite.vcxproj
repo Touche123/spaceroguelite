@@ -139,11 +139,13 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\enemy.cpp" />
+    <ClCompile Include="src\item.cpp" />
     <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\projectile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\enemy.h" />
+    <ClInclude Include="src\item.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\projectile.h" />
   </ItemGroup>

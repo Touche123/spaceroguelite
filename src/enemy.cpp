@@ -6,3 +6,8 @@ Enemy::Enemy()
 	sprite.setSize({ 40.f, 40.f });
 	sprite.setFillColor(sf::Color::Green);
 }
+
+void Enemy::draw(sf::RenderWindow& window)
+{
+	window.draw(sprite);
+}

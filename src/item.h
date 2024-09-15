@@ -1,13 +1,13 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-class Enemy {
+class Item {
 private:
-
+	
 public:
+	Item();
+	sf::Vector2f position;
 	sf::RectangleShape sprite;
-	float life = 3.f;
-	Enemy();
+	void setPosition(sf::Vector2f position);
 	void draw(sf::RenderWindow& window);
 };
-
