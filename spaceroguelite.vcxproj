@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\dev\c++\spaceroguelite\deps\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\dev\c++\spaceroguelite\deps\lib\SFML;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\deps\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\deps\lib\SFML;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>D:\dev\c++\spaceroguelite\deps\include;$(IncludePath)</IncludePath>
