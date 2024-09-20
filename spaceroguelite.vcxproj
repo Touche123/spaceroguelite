@@ -142,12 +142,14 @@
     <ClCompile Include="src\item.cpp" />
     <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\projectile.cpp" />
+    <ClCompile Include="src\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\enemy.h" />
     <ClInclude Include="src\item.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\projectile.h" />
+    <ClInclude Include="src\ui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

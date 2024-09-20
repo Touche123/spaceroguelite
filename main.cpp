@@ -1,10 +1,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <sstream>
+#include <format>
 
 #include "src/player.h"
 #include "src/enemy.h"
 #include "src/item.h"
+#include "src/ui.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
@@ -14,29 +15,22 @@ std::vector<Item> items;
 void SpawnEnemy(const sf::Window& window);
 
 int main() {
-  sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
+  sf::RenderWindow window(sf::VideoMode(1600, 900), "SFML works!");
   window.setMouseCursorVisible(false);
   sf::Font font;
   if (!font.loadFromFile("assets/fonts/TitilliumWeb-Regular.ttf"))
     std::cout << "error" << std::endl;
 
-  sf::Text text_delta;
-  text_delta.setPosition(0.0f, 0.0f);
-  text_delta.setFont(font);
-  text_delta.setString("Thest");
-  text_delta.setCharacterSize(24);
-  text_delta.setFillColor(sf::Color::Red);
-  text_delta.setStyle(sf::Text::Bold);
-
   Player player;
+  UI ui;
+
+  ui.init(&window);
 
   while (window.isOpen()) {
     sf::Event event;
     dt = deltaClock.restart();
 
-    std::ostringstream ss;
-    ss << "Deltatime: " << dt.asSeconds();
-    text_delta.setString(ss.str());
+    ui.update(dt.asSeconds(), player);
 
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed ||
@@ -54,20 +48,23 @@ int main() {
             if (player.projectiles[i].sprite.getGlobalBounds().intersects(enemies[j].sprite.getGlobalBounds()))
             {
                 enemies[j].life -= player.projectiles[i].damage;
+                // delete the enemy if it is dead
                 if (enemies[j].life < 0.f)
                 {
+                    player.score++;
                     Item item;
                     item.setPosition(enemies[j].sprite.getPosition());
                     items.push_back(item);
                     enemies.erase(enemies.begin() + j);
                 }
-
+                // delete the projectile
                 player.projectiles.erase(player.projectiles.begin() + i);
                 i--;
                 break;
             }
             
-            if (player.projectiles[i].position.x < 0
+            // delete the projectile if it is out of bounds
+           if (player.projectiles[i].position.x < 0
                 || player.projectiles[i].position.x > window.getSize().x
                 || player.projectiles[i].position.y < 0
                 || player.projectiles[i].position.y > window.getSize().y)
@@ -77,7 +74,7 @@ int main() {
             }
         }
     }
-
+    // handle pickups
     for (size_t i = 0; i < items.size(); i++) {
         if (items[i].sprite.getGlobalBounds().intersects(player.sprite.getGlobalBounds())) {
             player.firerate -= 0.01f;
@@ -111,7 +108,7 @@ int main() {
         projectile.draw(window);
     }
     
-    window.draw(text_delta);
+    ui.Draw(window);
     window.display();
   }
 

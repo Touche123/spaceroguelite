@@ -16,6 +16,7 @@ public:
 	float fire_cooldown;
 	float firerate;
 	bool is_firing;
+	int score;
 
 	float speed;
 
