@@ -5,12 +5,14 @@
 
 class BulletFactory {
 public:
-    BulletFactory(sf::Texture& bulletTexture, float bulletSpeed)
-        : bulletTexture(bulletTexture), bulletSpeed(bulletSpeed)
+    std::vector<Entity> bullets;
+
+    BulletFactory(sf::Texture& bulletTexture)
+        : bulletTexture(bulletTexture)
     {
     }
 
-    Entity createBullet(const sf::Vector2f& position, const sf::Vector2f& direction)
+    void createBullet(const sf::Vector2f& position, const sf::Vector2f& direction, float speed)
     {
         Entity bullet;
 
@@ -18,8 +20,10 @@ public:
         auto bulletPosition = std::make_shared<PositionComponent>();
         bulletPosition->position = position;  // Spawn bullet at player's position
 
-        auto bulletVelocity = std::make_shared<BulletComponent>();
-        bulletVelocity->velocity = direction * bulletSpeed;  // Set bullet velocity
+        auto bulletVelocity = std::make_shared<VelocityComponent>();
+        bulletVelocity->velocity = direction * speed;  // Set bullet velocity
+
+        auto bulletComponent = std::make_shared<BulletComponent>();
 
         auto spriteComponent = std::make_shared<SpriteComponent>();
         spriteComponent->sprite.setTexture(bulletTexture);  // Set bullet texture
@@ -29,11 +33,12 @@ public:
 
         // Add components to the bullet entity
         bullet.addComponent("Position", bulletPosition);
-        bullet.addComponent("Bullet", bulletVelocity);
+        bullet.addComponent("Velocity", bulletVelocity);
+        bullet.addComponent("Bullet", bulletComponent);
         bullet.addComponent("Sprite", spriteComponent);
         bullet.addComponent("Collision", collisionComponent);
 
-        return bullet;
+        bullets.push_back(bullet);
     }
 
 private:

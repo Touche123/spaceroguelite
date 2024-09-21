@@ -24,7 +24,7 @@ public:
 			{
 				if (healthComponent->canTakeDamage())
 				{
-					healthComponent->takeDamage(10.0f); // Example damage amount
+					healthComponent->takeDamage(10.0f); // Damage amount
 				}
 			}
 		}

@@ -30,8 +30,29 @@ struct InputComponent {
 };
 
 struct BulletComponent {
-	sf::Vector2f velocity;
 	float lifeTime = 5.0f;
+};
+
+struct ShootingComponent {
+	float shootCooldown;
+	float timeSinceLastShot;
+
+	ShootingComponent(float cooldown)
+		: shootCooldown(cooldown), timeSinceLastShot(0.0f) {}
+
+	bool canShoot() const {
+		return timeSinceLastShot >= shootCooldown;
+	}
+
+	void resetCooldown() {
+		timeSinceLastShot = 0.0f;
+	}
+
+	void updateCooldown(float deltaTime) {
+		if (timeSinceLastShot < shootCooldown) {
+			timeSinceLastShot += deltaTime;
+		}
+	}
 };
 
 struct HealthComponent {

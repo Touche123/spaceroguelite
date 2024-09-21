@@ -16,6 +16,7 @@
 #include "src/reticleSystem.h"
 #include "src/collisionsystem.h"
 #include "src/healthSystem.h"
+#include "src/enemyShootingSystem.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
@@ -55,20 +56,24 @@ int main() {
   playerEntity.addComponent("Health", healthComponent);
 
   std::vector<Entity> entities = { playerEntity };
-  std::vector<Entity> bullets;
+  
   std::vector<Entity> enemies;
 
 
   EventQueue eventQueue;
-  BulletFactory bulletFactory(bulletTexture, 400.0f);
+  
   CombatSystem combatSystem(eventQueue);
   InputSystem inputSystem(eventQueue, combatSystem);
   PhysicsSystem physicsSystem;
   RenderSystem renderSystem;
-  BulletSystem bulletSystem(bulletFactory, eventQueue);
+  
   ReticleSystem reticleSystem;
   CollisionSystem collisionSystem;
   HealthSystem healthSystem;
+
+  BulletFactory bulletFactory(bulletTexture);
+  BulletSystem bulletSystem(bulletFactory, eventQueue);
+  EnemyShootingSystem enemyShootingSystem;
 
   Player player;
   UI ui;
@@ -88,18 +93,19 @@ int main() {
           sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::Escape))
         window.close();
     }
-    inputSystem.update(window, entities, bullets);
-    bulletSystem.update(dt.asSeconds(), bullets);
+    inputSystem.update(window, entities, bulletFactory.bullets);
+    enemyShootingSystem.update(playerEntity, enemies, bulletFactory, dt.asSeconds());
+    bulletSystem.update(dt.asSeconds(), bulletFactory.bullets);
     physicsSystem.update(dt.asSeconds(), entities);
     reticleSystem.update(window, reticle);
     collisionSystem.checkPlayerEnemyCollisions(playerEntity, enemies, dt.asSeconds());
-    collisionSystem.update(bullets, enemies);
+    collisionSystem.update(bulletFactory.bullets, enemies);
     healthSystem.update(entities, enemies);
     if (enemies.size() <= 0)
         SpawnEnemy(window, enemies, playerTexture);
     window.clear();
     renderSystem.update(window, entities);
-    renderSystem.update(window, bullets);
+    renderSystem.update(window, bulletFactory.bullets);
     renderSystem.update(window, enemies);
     renderSystem.drawReticle(window, reticle);
     
@@ -131,11 +137,13 @@ Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float heal
     auto collisionComponent = std::make_shared<CollisionComponent>();
     collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
     auto healthComponent = std::make_shared<HealthComponent>(20.f, 0.f);
+    auto shootingComponent = std::make_shared<ShootingComponent>(2.f);
 
     enemy.addComponent("Position", positionComponent);
     enemy.addComponent("Sprite", spriteComponent);
     enemy.addComponent("Collision", collisionComponent);
     enemy.addComponent("Health", healthComponent);
+    enemy.addComponent("Shooting", shootingComponent);
 
     return enemy;
 }

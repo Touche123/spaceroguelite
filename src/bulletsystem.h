@@ -18,12 +18,12 @@ public:
         for (auto it = bullets.begin(); it != bullets.end();)
         {
             auto positionComponent = it->getComponent<PositionComponent>("Position");
-            auto bulletComponent = it->getComponent<BulletComponent>("Bullet");
+            auto velocityComponent = it->getComponent<VelocityComponent>("Velocity");
 
-            if (positionComponent && bulletComponent)
+            if (positionComponent && velocityComponent)
             {
                 // Update bullet position based on velocity
-                positionComponent->position += bulletComponent->velocity * deltaTime;
+                positionComponent->position += velocityComponent->velocity * deltaTime;
 
                 // Remove bullet if out of bounds
                 if (isOutOfBounds(positionComponent->position))
@@ -48,8 +48,7 @@ private:
             if (event.type == EventType::FireBullet)
             {
                 // Create and add a new bullet based on the event data
-                Entity bullet = bulletFactory.createBullet(event.position, event.direction);
-                bullets.push_back(bullet);
+                bulletFactory.createBullet(event.position, event.direction, 400.f);
             }
         }
         eventQueue.clear();  // Clear events after processing
