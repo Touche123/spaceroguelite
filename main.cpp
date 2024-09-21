@@ -6,6 +6,13 @@
 #include "src/enemy.h"
 #include "src/item.h"
 #include "src/ui.h"
+#include "src/entity.h"
+#include "src/inputsystem.h"
+#include "src/physicssystem.h"
+#include "src/rendersystem.h"
+#include "src/bulletsystem.h"
+#include "src/eventqueue.h"
+#include "src/bulletfactory.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
@@ -17,9 +24,34 @@ void SpawnEnemy(const sf::Window& window);
 int main() {
   sf::RenderWindow window(sf::VideoMode(1600, 900), "SFML works!");
   window.setMouseCursorVisible(false);
-  sf::Font font;
-  if (!font.loadFromFile("assets/fonts/TitilliumWeb-Regular.ttf"))
-    std::cout << "error" << std::endl;
+
+  sf::Texture playerTexture;
+  playerTexture.loadFromFile("assets/textures/player.png");
+
+  sf::Texture bulletTexture;
+  bulletTexture.loadFromFile("assets/textures/player.png");
+
+  Entity playerEntity;
+  auto positionComponent = std::make_shared<PositionComponent>();
+  auto velocityComponent = std::make_shared<VelocityComponent>();
+  auto inputComponent    = std::make_shared<InputComponent>();
+  auto spriteComponent = std::make_shared<SpriteComponent>();
+  spriteComponent->sprite.setTexture(playerTexture);
+  playerEntity.addComponent("Position", positionComponent);
+  playerEntity.addComponent("Sprite", spriteComponent);
+  playerEntity.addComponent("Velocity", velocityComponent);
+  playerEntity.addComponent("Input", inputComponent);
+
+  std::vector<Entity> entities = { playerEntity };
+  std::vector<Entity> bullets;
+
+  EventQueue eventQueue;
+  BulletFactory bulletFactory(bulletTexture, 400.0f);
+
+  InputSystem inputSystem(eventQueue);
+  PhysicsSystem physicsSystem;
+  RenderSystem renderSystem;
+  BulletSystem bulletSystem(bulletFactory, eventQueue);
 
   Player player;
   UI ui;
@@ -37,6 +69,9 @@ int main() {
           sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::Escape))
         window.close();
     }
+    inputSystem.update(window, entities, bullets);
+    bulletSystem.update(dt.asSeconds(), bullets);
+    physicsSystem.update(dt.asSeconds(), entities);
 
     player.update(window, dt.asSeconds());
 
@@ -92,8 +127,9 @@ int main() {
         SpawnEnemy(window);
 
     window.clear();
-    
-    player.draw(window);
+    renderSystem.update(window, entities);
+    renderSystem.update(window, bullets);
+    //player.draw(window);
     
     for (auto& enemy: enemies) {
         enemy.draw(window);

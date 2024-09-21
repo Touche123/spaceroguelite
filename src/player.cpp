@@ -45,7 +45,7 @@ void Player::update(sf::Window& window, float dt)
 	mouse_local_position = sf::Mouse::getPosition(window);
 	rectile.setPosition((float)mouse_local_position.x, (float)mouse_local_position.y);
 
-	updateWeapons(dt);
+	//updateWeapons(dt);
 }
 
 void Player::updateWeapons(float dt)

@@ -145,10 +145,18 @@
     <ClCompile Include="src\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\bulletfactory.h" />
+    <ClInclude Include="src\bulletsystem.h" />
+    <ClInclude Include="src\collisionsystem.h" />
     <ClInclude Include="src\enemy.h" />
+    <ClInclude Include="src\entity.h" />
+    <ClInclude Include="src\eventqueue.h" />
+    <ClInclude Include="src\inputsystem.h" />
     <ClInclude Include="src\item.h" />
+    <ClInclude Include="src\physicssystem.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\projectile.h" />
+    <ClInclude Include="src\rendersystem.h" />
     <ClInclude Include="src\ui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
