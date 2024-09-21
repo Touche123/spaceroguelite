@@ -14,6 +14,10 @@ struct SpriteComponent {
 
 struct CollisionComponent {
 	sf::FloatRect bounds;
+
+	void updateBounds(const sf::Sprite& sprite) {
+		bounds = sprite.getGlobalBounds();
+	}
 };
 
 struct VelocityComponent {
@@ -28,6 +32,33 @@ struct InputComponent {
 struct BulletComponent {
 	sf::Vector2f velocity;
 	float lifeTime = 5.0f;
+};
+
+struct HealthComponent {
+	float health;
+	float damageCooldown;
+	float timeSinceLastHit;
+
+	HealthComponent(float initialHealth, float cooldown) 
+		: health(initialHealth), damageCooldown(cooldown), timeSinceLastHit(0.0f) {}
+
+	void takeDamage(float amount) {
+		health -= amount;
+		timeSinceLastHit = 0.0f;
+	}
+
+	bool canTakeDamage() const {
+		return timeSinceLastHit >= damageCooldown;
+	}
+
+	bool isDead() const {
+		return health <= 0;
+	}
+
+	void updateCooldown(float deltaTime) {
+		if (timeSinceLastHit < damageCooldown)
+			timeSinceLastHit += deltaTime;
+	}
 };
 
 class Entity {

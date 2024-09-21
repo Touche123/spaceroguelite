@@ -14,14 +14,15 @@
 #include "src/eventqueue.h"
 #include "src/bulletfactory.h"
 #include "src/reticleSystem.h"
+#include "src/collisionsystem.h"
+#include "src/healthSystem.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
-std::vector<Enemy> enemies;
-std::vector<Item> items;
 
 Entity createReticleEntity(sf::Texture& reticleTexture);
-void SpawnEnemy(const sf::Window& window);
+Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float health);
+void SpawnEnemy(const sf::Window& window, std::vector<Entity>& enemies, sf::Texture& texture);
 
 int main() {
   sf::RenderWindow window(sf::VideoMode(1600, 900), "SFML works!");
@@ -41,14 +42,22 @@ int main() {
   auto velocityComponent = std::make_shared<VelocityComponent>();
   auto inputComponent    = std::make_shared<InputComponent>();
   auto spriteComponent = std::make_shared<SpriteComponent>();
+  auto collisionComponent = std::make_shared<CollisionComponent>();
+  collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
+  auto healthComponent = std::make_shared<HealthComponent>(100.f, 2.f);
+
   spriteComponent->sprite.setTexture(playerTexture);
   playerEntity.addComponent("Position", positionComponent);
   playerEntity.addComponent("Sprite", spriteComponent);
   playerEntity.addComponent("Velocity", velocityComponent);
   playerEntity.addComponent("Input", inputComponent);
+  playerEntity.addComponent("Collision", collisionComponent);
+  playerEntity.addComponent("Health", healthComponent);
 
   std::vector<Entity> entities = { playerEntity };
   std::vector<Entity> bullets;
+  std::vector<Entity> enemies;
+
 
   EventQueue eventQueue;
   BulletFactory bulletFactory(bulletTexture, 400.0f);
@@ -58,11 +67,15 @@ int main() {
   RenderSystem renderSystem;
   BulletSystem bulletSystem(bulletFactory, eventQueue);
   ReticleSystem reticleSystem;
+  CollisionSystem collisionSystem;
+  HealthSystem healthSystem;
 
   Player player;
   UI ui;
 
   ui.init(&window);
+
+  SpawnEnemy(window, enemies, playerTexture);
 
   while (window.isOpen()) {
     sf::Event event;
@@ -79,78 +92,16 @@ int main() {
     bulletSystem.update(dt.asSeconds(), bullets);
     physicsSystem.update(dt.asSeconds(), entities);
     reticleSystem.update(window, reticle);
-
-    player.update(window, dt.asSeconds());
-
-    // Iterate over all the projectiles and enemies.
-    // Subract the damage from the healt of the enemy. And destroy accordingly.
-    for (size_t i = 0; i < player.projectiles.size(); i++) {
-        for (size_t j = 0; j < enemies.size(); j++)
-        {
-            if (player.projectiles[i].sprite.getGlobalBounds().intersects(enemies[j].sprite.getGlobalBounds()))
-            {
-                enemies[j].life -= player.projectiles[i].damage;
-                // delete the enemy if it is dead
-                if (enemies[j].life < 0.f)
-                {
-                    player.score++;
-                    Item item;
-                    item.setPosition(enemies[j].sprite.getPosition());
-                    items.push_back(item);
-                    enemies.erase(enemies.begin() + j);
-                }
-                // delete the projectile
-                player.projectiles.erase(player.projectiles.begin() + i);
-                i--;
-                break;
-            }
-            
-            // delete the projectile if it is out of bounds
-           if (player.projectiles[i].position.x < 0
-                || player.projectiles[i].position.x > window.getSize().x
-                || player.projectiles[i].position.y < 0
-                || player.projectiles[i].position.y > window.getSize().y)
-            {
-                player.projectiles.erase(player.projectiles.begin() + i);
-                break;
-            }
-        }
-    }
-    // handle pickups
-    for (size_t i = 0; i < items.size(); i++) {
-        if (items[i].sprite.getGlobalBounds().intersects(player.sprite.getGlobalBounds())) {
-            player.firerate -= 0.01f;
-
-            if (player.firerate < 0.05f)
-                player.firerate = 0.05f;
-            
-            items.erase(items.begin() + i);
-            i--;
-            break;
-        }
-    }
-
+    collisionSystem.checkPlayerEnemyCollisions(playerEntity, enemies, dt.asSeconds());
+    collisionSystem.update(bullets, enemies);
+    healthSystem.update(entities, enemies);
     if (enemies.size() <= 0)
-        SpawnEnemy(window);
-
+        SpawnEnemy(window, enemies, playerTexture);
     window.clear();
     renderSystem.update(window, entities);
     renderSystem.update(window, bullets);
+    renderSystem.update(window, enemies);
     renderSystem.drawReticle(window, reticle);
-    //player.draw(window);
-    
-    for (auto& enemy: enemies) {
-        enemy.draw(window);
-    }
-
-    for (auto& item : items)
-    {
-        item.draw(window);
-    }
-
-    for (auto& projectile : player.projectiles) {
-        projectile.draw(window);
-    }
     
     ui.Draw(window);
     window.display();
@@ -171,21 +122,39 @@ Entity createReticleEntity(sf::Texture& reticleTexture) {
     return reticle;
 }
 
-void SpawnEnemy(const sf::Window& window)
+Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float health) {
+    Entity enemy;
+    auto positionComponent = std::make_shared<PositionComponent>();
+    positionComponent->position = position;
+    auto spriteComponent = std::make_shared<SpriteComponent>();
+    spriteComponent->sprite.setTexture(texture);
+    auto collisionComponent = std::make_shared<CollisionComponent>();
+    collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
+    auto healthComponent = std::make_shared<HealthComponent>(20.f, 0.f);
+
+    enemy.addComponent("Position", positionComponent);
+    enemy.addComponent("Sprite", spriteComponent);
+    enemy.addComponent("Collision", collisionComponent);
+    enemy.addComponent("Health", healthComponent);
+
+    return enemy;
+}
+
+void SpawnEnemy(const sf::Window& window, std::vector<Entity>& enemies, sf::Texture& texture)
 {
     // Spawn an enemy at a random position
     for (int i = 0; i < 5; ++i)
     { // Spawning 5 random enemies
-        Enemy enemy; // Create an enemy of size 50x50
-       
+        auto enemy = createEnemyEntity(texture, { 0,0 }, 100.0f);
+        auto spriteComponent = enemy.getComponent<SpriteComponent>("Sprite");
+        auto positionComponent = enemy.getComponent<PositionComponent>("Position");
+
         // 1. Generate random position within the window's bounds
-        float randomX = static_cast<float>(std::rand() % (window.getSize().x - static_cast<int>(enemy.sprite.getSize().x)));
-        float randomY = static_cast<float>(std::rand() % (window.getSize().y - static_cast<int>(enemy.sprite.getSize().y)));
+        float randomX = static_cast<float>(std::rand() % (window.getSize().x - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().x)));
+        float randomY = static_cast<float>(std::rand() % (window.getSize().y - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().y)));
 
-        // 2. Set the enemy's position to the random coordinates
-        enemy.sprite.setPosition(randomX, randomY);
+        positionComponent->position = { randomX, randomY };
 
-        // 3. Add enemy to the list of enemies
         enemies.push_back(enemy);
     }
 }

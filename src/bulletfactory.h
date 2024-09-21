@@ -24,10 +24,14 @@ public:
         auto spriteComponent = std::make_shared<SpriteComponent>();
         spriteComponent->sprite.setTexture(bulletTexture);  // Set bullet texture
 
+        auto collisionComponent = std::make_shared<CollisionComponent>();
+        collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
+
         // Add components to the bullet entity
         bullet.addComponent("Position", bulletPosition);
         bullet.addComponent("Bullet", bulletVelocity);
         bullet.addComponent("Sprite", spriteComponent);
+        bullet.addComponent("Collision", collisionComponent);
 
         return bullet;
     }

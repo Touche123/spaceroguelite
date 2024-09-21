@@ -10,10 +10,14 @@ public:
 			
 			auto spriteComponent = entity.getComponent<SpriteComponent>("Sprite");
 			auto positionComponent = entity.getComponent<PositionComponent>("Position");
+			auto collisionComponent = entity.getComponent<CollisionComponent>("Collision");
 
 			if (spriteComponent && positionComponent) {
 				spriteComponent->sprite.setPosition(positionComponent->position);
 
+				if (collisionComponent) {
+					collisionComponent->updateBounds(spriteComponent->sprite);
+				}
 				window.draw(spriteComponent->sprite);
 			}
 		}
