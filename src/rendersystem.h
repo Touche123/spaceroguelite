@@ -18,4 +18,13 @@ public:
 			}
 		}
 	}
+
+	void drawReticle(sf::RenderWindow& window, Entity& reticle)
+	{
+		auto spriteComponent = reticle.getComponent<SpriteComponent>("Sprite");
+		if (spriteComponent)
+		{
+			window.draw(spriteComponent->sprite);
+		}
+	}
 };

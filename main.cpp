@@ -13,12 +13,14 @@
 #include "src/bulletsystem.h"
 #include "src/eventqueue.h"
 #include "src/bulletfactory.h"
+#include "src/reticleSystem.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
 std::vector<Enemy> enemies;
 std::vector<Item> items;
 
+Entity createReticleEntity(sf::Texture& reticleTexture);
 void SpawnEnemy(const sf::Window& window);
 
 int main() {
@@ -30,7 +32,10 @@ int main() {
 
   sf::Texture bulletTexture;
   bulletTexture.loadFromFile("assets/textures/player.png");
+  sf::Texture reticleTexture;
+  reticleTexture.loadFromFile("assets/textures/player.png");
 
+  Entity reticle = createReticleEntity(reticleTexture);
   Entity playerEntity;
   auto positionComponent = std::make_shared<PositionComponent>();
   auto velocityComponent = std::make_shared<VelocityComponent>();
@@ -52,6 +57,7 @@ int main() {
   PhysicsSystem physicsSystem;
   RenderSystem renderSystem;
   BulletSystem bulletSystem(bulletFactory, eventQueue);
+  ReticleSystem reticleSystem;
 
   Player player;
   UI ui;
@@ -72,6 +78,7 @@ int main() {
     inputSystem.update(window, entities, bullets);
     bulletSystem.update(dt.asSeconds(), bullets);
     physicsSystem.update(dt.asSeconds(), entities);
+    reticleSystem.update(window, reticle);
 
     player.update(window, dt.asSeconds());
 
@@ -129,6 +136,7 @@ int main() {
     window.clear();
     renderSystem.update(window, entities);
     renderSystem.update(window, bullets);
+    renderSystem.drawReticle(window, reticle);
     //player.draw(window);
     
     for (auto& enemy: enemies) {
@@ -149,6 +157,18 @@ int main() {
   }
 
   return 0;
+}
+
+Entity createReticleEntity(sf::Texture& reticleTexture) {
+    Entity reticle;
+    auto positionComponent = std::make_shared<PositionComponent>();
+    auto spriteComponent = std::make_shared<SpriteComponent>();
+    spriteComponent->sprite.setTexture(reticleTexture);
+
+    reticle.addComponent("Position", positionComponent);
+    reticle.addComponent("Sprite", spriteComponent);
+
+    return reticle;
 }
 
 void SpawnEnemy(const sf::Window& window)

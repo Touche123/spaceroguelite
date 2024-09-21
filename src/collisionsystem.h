@@ -1,5 +1,5 @@
 #pragma once
-#include "src/entity.h"
+#include "entity.h"
 
 class CollisionSystem {
 public:

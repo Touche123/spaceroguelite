@@ -158,6 +158,7 @@
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\projectile.h" />
     <ClInclude Include="src\rendersystem.h" />
+    <ClInclude Include="src\reticleSystem.h" />
     <ClInclude Include="src\ui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

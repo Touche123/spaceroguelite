@@ -57,6 +57,6 @@ private:
 
     bool isOutOfBounds(const sf::Vector2f& position)
     {
-        return position.x < 0 || position.x > 800 || position.y < 0 || position.y > 600;
+        return position.x < 0 || position.x > 1600 || position.y < 0 || position.y > 900;
     }
 };

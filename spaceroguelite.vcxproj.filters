@@ -77,5 +77,8 @@
     <ClInclude Include="src\combatsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\reticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
