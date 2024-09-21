@@ -3,10 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include "src/entity.h"
 #include "eventqueue.h"
+#include "combatsystem.h"
 
 class InputSystem {
 public:
-	InputSystem(EventQueue& eventQueue) : eventQueue(eventQueue) {}
+	InputSystem(EventQueue& eventQueue, CombatSystem& combatSystem) 
+		: eventQueue(eventQueue), combatSystem(combatSystem) {}
 	void update(sf::RenderWindow& window, std::vector<Entity>& entities, std::vector<Entity>& bullets) {
 		for (auto& entity : entities) {
 			auto inputComponent = entity.getComponent<InputComponent>("Input");
@@ -26,7 +28,7 @@ public:
 				// Check if the player is firing
 				if (inputComponent->isFiring) {
 					// Create a new bullet entity
-					fireBullet(window, positionComponent->position);
+					combatSystem.fireBullet(window, positionComponent->position);
 				}
 			}
 		}
@@ -34,6 +36,7 @@ public:
 
 private:
 	EventQueue& eventQueue;
+	CombatSystem& combatSystem;
 
 	float speed = 200.0f;
 
@@ -72,43 +75,5 @@ private:
 		// Post a fire bullet event to the event queue
 		Event bulletEvent = { EventType::FireBullet, playerPosition, direction };
 		eventQueue.addEvent(bulletEvent);
-	}
-
-	Entity createBullet(const Entity& player, sf::RenderWindow& window) {
-		Entity bullet;
-
-		// Retrieve the player's position to spawn the bullet from there
-		auto positionComponent = player.getComponent<PositionComponent>("Position");
-
-		// Retrieve the mouse position relative to the game window
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-		sf::Vector2f mosueWorldPos = window.mapPixelToCoords(mousePosition);
-
-		// Calculate the direction vector from player to mouse
-		sf::Vector2f direction = mosueWorldPos - positionComponent->position;
-
-		// Normalize the direction vector
-		float magnitude = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-		if (magnitude != 0) {
-			direction /= magnitude; // Normalize direction
-		}
-
-		// Create components for the bullet
-		auto bulletPosition = std::make_shared<PositionComponent>();
-		bulletPosition->position = positionComponent->position; // Spawn the bullet at player's position
-
-		auto bulletVelocity = std::make_shared<BulletComponent>();
-		bulletVelocity->velocity = direction * 400.f; // Set bullet velocity in the direction of the mouse
-
-		sf::Texture bulletTexture;
-		bulletTexture.loadFromFile("assets/textures/player.png");
-		auto spriteComponent = std::make_shared<SpriteComponent>();
-		spriteComponent->sprite.setTexture(bulletTexture);
-
-		bullet.addComponent("Position", bulletPosition);
-		bullet.addComponent("Bullet", bulletVelocity);
-		bullet.addComponent("Sprite", spriteComponent);
-
-		return bullet;
 	}
 };

@@ -47,8 +47,8 @@ int main() {
 
   EventQueue eventQueue;
   BulletFactory bulletFactory(bulletTexture, 400.0f);
-
-  InputSystem inputSystem(eventQueue);
+  CombatSystem combatSystem(eventQueue);
+  InputSystem inputSystem(eventQueue, combatSystem);
   PhysicsSystem physicsSystem;
   RenderSystem renderSystem;
   BulletSystem bulletSystem(bulletFactory, eventQueue);

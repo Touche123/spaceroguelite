@@ -148,6 +148,7 @@
     <ClInclude Include="src\bulletfactory.h" />
     <ClInclude Include="src\bulletsystem.h" />
     <ClInclude Include="src\collisionsystem.h" />
+    <ClInclude Include="src\combatsystem.h" />
     <ClInclude Include="src\enemy.h" />
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\eventqueue.h" />

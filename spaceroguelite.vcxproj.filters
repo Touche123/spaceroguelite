@@ -74,5 +74,8 @@
     <ClInclude Include="src\bulletfactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\combatsystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
