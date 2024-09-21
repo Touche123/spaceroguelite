@@ -31,6 +31,6 @@ private:
 			direction /= magnitude;
 		}
 
-		bulletFactory.createBullet(enemyPosition, direction, 200.f);
+		bulletFactory.createEnemyBullet(enemyPosition, direction, 200.f);
 	}
 };

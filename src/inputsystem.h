@@ -57,7 +57,7 @@ private:
 			inputComponent->movementDirection.x = 1;
 		}
 
-		//inputComponent->isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+		inputComponent->isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 	}
 
 	void fireBullet(sf::RenderWindow& window, const sf::Vector2f& playerPosition)

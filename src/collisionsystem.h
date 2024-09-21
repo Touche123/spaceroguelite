@@ -30,9 +30,11 @@ public:
 		}
 	}
 
-	void update(std::vector<Entity>& bullets, std::vector<Entity>& enemies) {
+	void updateEnemyBullets(Entity& playerEntity, std::vector<Entity>& bullets) {
 		for (auto it = bullets.begin(); it != bullets.end();) {
 			auto bulletPosition = it->getComponent<PositionComponent>("Position");
+			auto bulletSprite = it->getComponent<SpriteComponent>("Sprite");
+
 			if (!bulletPosition) {
 				++it;
 				continue;
@@ -40,11 +42,50 @@ public:
 
 			bool bulletHit = false;
 
-			for (auto& enemy : enemies) {
+			auto playerPosition = playerEntity.getComponent<PositionComponent>("Position");
+			auto playerSprite = playerEntity.getComponent<SpriteComponent>("Sprite");
+			if (playerPosition && playerSprite && checkCollision(bulletSprite->sprite.getGlobalBounds(), playerSprite->sprite.getGlobalBounds()))
+			{
+				auto healthComponent = playerEntity.getComponent<HealthComponent>("Health");
+
+				if (healthComponent)
+				{
+					healthComponent->takeDamage(10.0f);
+				}
+
+				bulletHit = true;
+			}
+
+			if (bulletHit) {
+				it = bullets.erase(it);
+			} else {
+				++it;
+			}
+		}
+	}
+
+	void updatePlayerBullets(std::vector<Entity>& playerBullets, std::vector<Entity>& enemies)
+	{
+		for (auto it = playerBullets.begin(); it != playerBullets.end();)
+		{
+			auto bulletPosition = it->getComponent<PositionComponent>("Position");
+			auto bulletSprite = it->getComponent<SpriteComponent>("Sprite");
+
+			if (!bulletPosition)
+			{
+				++it;
+				continue;
+			}
+
+			bool bulletHit = false;
+
+			for (auto& enemy : enemies)
+			{
 				auto enemyPosition = enemy.getComponent<PositionComponent>("Position");
 				auto enemySprite = enemy.getComponent<SpriteComponent>("Sprite");
 
-				if (enemyPosition && enemySprite && checkCollision(bulletPosition->position, enemyPosition->position, enemySprite->sprite.getGlobalBounds())) {
+				if (enemyPosition && enemySprite && checkCollision(bulletSprite->sprite.getGlobalBounds(), enemySprite->sprite.getGlobalBounds()))
+				{
 					auto healthComponent = enemy.getComponent<HealthComponent>("Health");
 
 					if (healthComponent)
@@ -57,9 +98,11 @@ public:
 				}
 			}
 
-			if (bulletHit) {
-				it = bullets.erase(it);
-			} else {
+			if (bulletHit)
+			{
+				it = playerBullets.erase(it);
+			} else
+			{
 				++it;
 			}
 		}
@@ -77,8 +120,9 @@ private:
 
 	}
 
-	bool checkCollision(const sf::Vector2f& bulletPosition, const sf::Vector2f& enemyPosition, const sf::FloatRect& enemyBounds)
+	bool checkCollision(const sf::FloatRect& bounds1, const sf::FloatRect& bounds2)
 	{
-		return enemyBounds.contains(bulletPosition);
+		
+		return bounds1.intersects(bounds2);
 	}
 };
