@@ -2,7 +2,8 @@
 #include <SFML/Graphics.hpp>
 
 enum class EventType {
-	FireBullet
+	FireBullet,
+	EnemyDeath
 };
 
 struct Event {

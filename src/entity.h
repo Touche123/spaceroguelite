@@ -3,6 +3,10 @@
 #include <string>
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include <functional>
+
+class IMovementBehavior;
 
 struct PositionComponent {
 	sf::Vector2f position;
@@ -55,16 +59,52 @@ struct ShootingComponent {
 	}
 };
 
+struct BehaviorComponent {
+	std::shared_ptr<IMovementBehavior> behavior;
+
+	BehaviorComponent(std::shared_ptr<IMovementBehavior> behavior)
+		: behavior(behavior) { }
+};
+
+struct AudioComponent {
+	std::map<std::string, sf::SoundBuffer> soundBuffers;
+	std::map<std::string, sf::Sound> sounds;
+
+	bool loadSound(const std::string& name, const std::string filename) {
+		sf::SoundBuffer buffer;
+		if (buffer.loadFromFile(filename)) {
+			soundBuffers[name] = buffer;
+			sounds[name] = sf::Sound();
+			sounds[name].setBuffer(soundBuffers[name]);
+			return true;
+		}
+		return false;
+	}
+
+	void play(const std::string& name) {
+		if (sounds.find(name) != sounds.end()) {
+			sounds[name].play();
+		}
+	}
+};
+
 struct HealthComponent {
 	float health;
 	float damageCooldown;
 	float timeSinceLastHit;
+	std::function<void()> onDeath;
 
 	HealthComponent(float initialHealth, float cooldown) 
 		: health(initialHealth), damageCooldown(cooldown), timeSinceLastHit(0.0f) {}
 
 	void takeDamage(float amount) {
 		health -= amount;
+		
+		if (health <= 0) {
+			health = 0;
+			if (onDeath)
+				onDeath();
+		}
 		timeSinceLastHit = 0.0f;
 	}
 

@@ -13,18 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Systems">
+      <UniqueIdentifier>{feb48a46-151b-46e7-80cd-f098a0a3104c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\projectile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\enemy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\item.cpp">
@@ -35,15 +29,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\projectile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\enemy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -53,19 +38,13 @@
     <ClInclude Include="src\entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\collisionsystem.h">
+    <ClInclude Include="src\systems\inputsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\inputsystem.h">
+    <ClInclude Include="src\systems\physicssystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\physicssystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\rendersystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\bulletsystem.h">
+    <ClInclude Include="src\systems\rendersystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\eventqueue.h">
@@ -74,16 +53,28 @@
     <ClInclude Include="src\bulletfactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\combatsystem.h">
+    <ClInclude Include="src\systems\reticleSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\reticleSystem.h">
+    <ClInclude Include="src\systems\healthSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\healthSystem.h">
+    <ClInclude Include="src\systems\enemyShootingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\enemyShootingSystem.h">
+    <ClInclude Include="src\systems\bulletsystem.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\collisionsystem.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\combatsystem.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\movementBehavior.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\MovementSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

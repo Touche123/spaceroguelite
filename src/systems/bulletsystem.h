@@ -1,8 +1,8 @@
 #pragma once
 
 #include "src/entity.h"
-#include "bulletfactory.h"
-#include "eventqueue.h"
+#include "../bulletfactory.h"
+#include "../eventqueue.h"
 
 class BulletSystem {
 public:

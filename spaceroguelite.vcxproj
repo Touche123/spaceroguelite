@@ -117,7 +117,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,29 +138,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\enemy.cpp" />
     <ClCompile Include="src\item.cpp" />
-    <ClCompile Include="src\player.cpp" />
-    <ClCompile Include="src\projectile.cpp" />
     <ClCompile Include="src\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bulletfactory.h" />
-    <ClInclude Include="src\bulletsystem.h" />
-    <ClInclude Include="src\collisionsystem.h" />
-    <ClInclude Include="src\combatsystem.h" />
-    <ClInclude Include="src\enemy.h" />
-    <ClInclude Include="src\enemyShootingSystem.h" />
+    <ClInclude Include="src\movementBehavior.h" />
+    <ClInclude Include="src\systems\bulletsystem.h" />
+    <ClInclude Include="src\systems\collisionsystem.h" />
+    <ClInclude Include="src\systems\combatsystem.h" />
+    <ClInclude Include="src\systems\enemyShootingSystem.h" />
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\eventqueue.h" />
-    <ClInclude Include="src\healthSystem.h" />
-    <ClInclude Include="src\inputsystem.h" />
+    <ClInclude Include="src\systems\healthSystem.h" />
+    <ClInclude Include="src\systems\inputsystem.h" />
     <ClInclude Include="src\item.h" />
-    <ClInclude Include="src\physicssystem.h" />
-    <ClInclude Include="src\player.h" />
-    <ClInclude Include="src\projectile.h" />
-    <ClInclude Include="src\rendersystem.h" />
-    <ClInclude Include="src\reticleSystem.h" />
+    <ClInclude Include="src\systems\MovementSystem.h" />
+    <ClInclude Include="src\systems\physicssystem.h" />
+    <ClInclude Include="src\systems\rendersystem.h" />
+    <ClInclude Include="src\systems\reticleSystem.h" />
     <ClInclude Include="src\ui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

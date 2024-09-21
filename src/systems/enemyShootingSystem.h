@@ -1,6 +1,6 @@
 #pragma once
-#include "entity.h"
-#include "bulletfactory.h"
+#include "../entity.h"
+#include "../bulletfactory.h"
 
 class EnemyShootingSystem {
 public:
@@ -12,9 +12,12 @@ public:
 		for (auto& enemy : enemies) {
 			auto enemyPosition = enemy.getComponent<PositionComponent>("Position");
 			auto shootComponent = enemy.getComponent<ShootingComponent>("Shooting");
+			auto audioComponent = enemy.getComponent<AudioComponent>("Audio");
 
 			if (enemyPosition && shootComponent && shootComponent->canShoot()) {
 				fireBulletAtPlayer(enemyPosition->position, playerPosition->position, bulletFactory);
+				if (audioComponent)
+					audioComponent->play("Shoot");
 				shootComponent->resetCooldown();
 			}
 

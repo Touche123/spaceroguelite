@@ -2,27 +2,28 @@
 #include <iostream>
 #include <format>
 
-#include "src/player.h"
-#include "src/enemy.h"
 #include "src/item.h"
 #include "src/ui.h"
 #include "src/entity.h"
-#include "src/inputsystem.h"
-#include "src/physicssystem.h"
-#include "src/rendersystem.h"
-#include "src/bulletsystem.h"
+#include "src/systems/inputsystem.h"
+#include "src/systems/physicssystem.h"
+#include "src/systems/rendersystem.h"
+#include "src/systems/bulletsystem.h"
 #include "src/eventqueue.h"
 #include "src/bulletfactory.h"
-#include "src/reticleSystem.h"
-#include "src/collisionsystem.h"
-#include "src/healthSystem.h"
-#include "src/enemyShootingSystem.h"
+#include "src/systems/reticleSystem.h"
+#include "src/systems/collisionsystem.h"
+#include "src/systems/healthSystem.h"
+#include "src/systems/enemyShootingSystem.h"
+#include "src/movementBehavior.h"
+#include "src/systems/MovementSystem.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
 
 Entity createReticleEntity(sf::Texture& reticleTexture);
 Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float health);
+Entity playerEntity;
 void SpawnEnemy(const sf::Window& window, std::vector<Entity>& enemies, sf::Texture& texture);
 
 int main()
@@ -46,7 +47,7 @@ int main()
 	reticleTexture.loadFromFile("assets/textures/reticle.png");
 
 	Entity reticle = createReticleEntity(reticleTexture);
-	Entity playerEntity;
+	
 	auto positionComponent = std::make_shared<PositionComponent>();
 	auto velocityComponent = std::make_shared<VelocityComponent>();
 	auto inputComponent = std::make_shared<InputComponent>();
@@ -78,12 +79,12 @@ int main()
 	ReticleSystem reticleSystem;
 	CollisionSystem collisionSystem;
 	HealthSystem healthSystem;
+	MovementSystem movementSystem;
 
 	BulletFactory bulletFactory(enemyBulletTexture);
 	BulletSystem bulletSystem(bulletFactory, eventQueue);
 	EnemyShootingSystem enemyShootingSystem;
 
-	Player player;
 	UI ui;
 
 	ui.init(&window);
@@ -103,6 +104,7 @@ int main()
 		}
 		inputSystem.update(window, entities, bulletFactory.playerBullets);
 		enemyShootingSystem.update(playerEntity, enemies, bulletFactory, dt.asSeconds());
+		movementSystem.update(enemies, dt.asSeconds());
 
 		bulletSystem.update(dt.asSeconds());
 		physicsSystem.update(dt.asSeconds(), entities);
@@ -145,18 +147,33 @@ Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float heal
 	Entity enemy;
 	auto positionComponent = std::make_shared<PositionComponent>();
 	positionComponent->position = position;
+	auto velocityComponent = std::make_shared<VelocityComponent>();
+
 	auto spriteComponent = std::make_shared<SpriteComponent>();
 	spriteComponent->sprite.setTexture(texture);
 	auto collisionComponent = std::make_shared<CollisionComponent>();
 	collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
 	auto healthComponent = std::make_shared<HealthComponent>(20.f, 0.f);
+
+
 	auto shootingComponent = std::make_shared<ShootingComponent>(2.f);
 
+	std::shared_ptr<IMovementBehavior> movementBehavior;
+	movementBehavior = std::make_shared<FollowPlayerMovement>(playerEntity);
+
+	auto behaviorComponent = std::make_shared<BehaviorComponent>(movementBehavior);
+	auto audioComponent = std::make_shared<AudioComponent>();
+	audioComponent->loadSound("Death", "assets/sounds/death.wav");
+	audioComponent->loadSound("Shoot", "assets/sounds/shoot.wav");
+	enemy.addComponent("Audio", audioComponent);
+
 	enemy.addComponent("Position", positionComponent);
+	enemy.addComponent("Velocity", velocityComponent);
 	enemy.addComponent("Sprite", spriteComponent);
 	enemy.addComponent("Collision", collisionComponent);
 	enemy.addComponent("Health", healthComponent);
 	enemy.addComponent("Shooting", shootingComponent);
+	enemy.addComponent("MovementBehavior", behaviorComponent);
 
 	return enemy;
 }
@@ -169,7 +186,7 @@ void SpawnEnemy(const sf::Window& window, std::vector<Entity>& enemies, sf::Text
 		auto enemy = createEnemyEntity(texture, { 0,0 }, 100.0f);
 		auto spriteComponent = enemy.getComponent<SpriteComponent>("Sprite");
 		auto positionComponent = enemy.getComponent<PositionComponent>("Position");
-
+		
 		// 1. Generate random position within the window's bounds
 		float randomX = static_cast<float>(std::rand() % (window.getSize().x - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().x)));
 		float randomY = static_cast<float>(std::rand() % (window.getSize().y - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().y)));

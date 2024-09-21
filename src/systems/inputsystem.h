@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "src/entity.h"
-#include "eventqueue.h"
+#include "../eventqueue.h"
 #include "combatsystem.h"
 
 class InputSystem {
