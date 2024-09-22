@@ -37,6 +37,10 @@ struct BulletComponent {
 	float lifeTime = 5.0f;
 };
 
+struct PlayerComponent {
+
+};
+
 struct ShootingComponent {
 	float shootCooldown;
 	float timeSinceLastShot;

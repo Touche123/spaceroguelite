@@ -21,9 +21,11 @@ public:
             direction /= magnitude;
         }
 
+        Event fireBulletEvent;
+        fireBulletEvent.type = EventType::FireBullet;
+        fireBulletEvent.data = FireBulletEventData{ playerPosition, direction };
         // Post a fire bullet event
-        Event bulletEvent = { EventType::FireBullet, playerPosition, direction };
-        eventQueue.addEvent(bulletEvent);
+        eventQueue.addEvent(fireBulletEvent);
     }
 
 private:

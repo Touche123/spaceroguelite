@@ -64,15 +64,18 @@ private:
 
     void processEvents()
     {
-        for (const auto& event : eventQueue.getEvents())
-        {
-            if (event.type == EventType::FireBullet)
-            {
-                // Create and add a new bullet based on the event data
-                bulletFactory.createPlayerBullets(event.position, event.direction, 400.f);
+        auto fireBulletEvents = eventQueue.getEventsByType(EventType::FireBullet);
+
+        for (auto& eventRef : fireBulletEvents) {
+            Event& event = eventRef.get();
+            if (event.status == EventStatus::Pending) {
+                if (auto* fireBulletData = std::get_if<FireBulletEventData>(&event.data)) {
+                    // Create and add a new bullet based on the event data
+                    bulletFactory.createPlayerBullets(fireBulletData->position, fireBulletData->direction, 400.f);
+                    event.status = EventStatus::Processed;
+                }
             }
         }
-        eventQueue.clear();  // Clear events after processing
     }
 
     bool isOutOfBounds(const sf::Vector2f& position)

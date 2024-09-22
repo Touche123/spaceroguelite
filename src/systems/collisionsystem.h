@@ -4,6 +4,11 @@
 
 class CollisionSystem {
 public:
+	CollisionSystem(EventQueue& eventQueue)
+		: eventQueue(eventQueue)
+	{
+	}
+
 	void checkPlayerEnemyCollisions(Entity& player, std::vector<Entity>& enemies, float deltaTime)
 	{
 		auto playerCollision = player.getComponent<CollisionComponent>("Collision");
@@ -18,6 +23,10 @@ public:
 
 		for (const auto& enemy : enemies)
 		{
+			auto playerComponent = enemy.getComponent<PlayerComponent>("Player");
+			if (playerComponent)
+				continue;
+
 			auto enemyCollision = enemy.getComponent<CollisionComponent>("Collision");
 
 			if (enemyCollision && playerCollision->bounds.intersects(enemyCollision->bounds))
@@ -50,7 +59,12 @@ public:
 
 				if (healthComponent)
 				{
-					healthComponent->takeDamage(10.0f);
+					Event damageEvent;
+					damageEvent.type = EventType::DamageEntity;
+					damageEvent.data = DamageEntityEventData{ playerEntity.id, 10.f };
+					// Post a damage entity event
+					eventQueue.addEvent(damageEvent);
+					//healthComponent->takeDamage(10.0f);
 				}
 
 				bulletHit = true;
@@ -83,6 +97,10 @@ public:
 			{
 				auto enemyPosition = enemy.getComponent<PositionComponent>("Position");
 				auto enemySprite = enemy.getComponent<SpriteComponent>("Sprite");
+				auto playerComponent = enemy.getComponent<PlayerComponent>("Player");
+
+				if (playerComponent)
+					continue;
 
 				if (enemyPosition && enemySprite && checkCollision(bulletSprite->sprite.getGlobalBounds(), enemySprite->sprite.getGlobalBounds()))
 				{
@@ -90,7 +108,14 @@ public:
 
 					if (healthComponent)
 					{
-						healthComponent->takeDamage(2.0f);
+						std::cout << enemy.id << std::endl;
+						Event damageEvent;
+						damageEvent.type = EventType::DamageEntity;
+						damageEvent.data = DamageEntityEventData{ enemy.id, 5.f };
+						// Post a damage entity event
+						eventQueue.addEvent(damageEvent);
+
+						//healthComponent->takeDamage(2.0f);
 					}
 
 					bulletHit = true;
@@ -109,6 +134,8 @@ public:
 	}
 
 private:
+	EventQueue& eventQueue;
+
 	void handleCollision(Entity& entity1, Entity& entity2) {
 		// Add collision logic (bounce, damage, etc.)
 		auto healthComponent = entity1.getComponent<HealthComponent>("Health");

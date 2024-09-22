@@ -59,21 +59,4 @@ private:
 
 		inputComponent->isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 	}
-
-	void fireBullet(sf::RenderWindow& window, const sf::Vector2f& playerPosition)
-	{
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-		sf::Vector2f mouseWorldPos = window.mapPixelToCoords(mousePosition);
-
-		sf::Vector2f direction = mouseWorldPos - playerPosition;
-		float magnitude = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-		if (magnitude != 0)
-		{
-			direction /= magnitude;
-		}
-
-		// Post a fire bullet event to the event queue
-		Event bulletEvent = { EventType::FireBullet, playerPosition, direction };
-		eventQueue.addEvent(bulletEvent);
-	}
 };

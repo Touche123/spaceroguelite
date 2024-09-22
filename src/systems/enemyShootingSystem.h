@@ -6,10 +6,15 @@ class EnemyShootingSystem {
 public:
 	void update(Entity& player, std::vector<Entity>& enemies, BulletFactory& bulletFactory, float deltaTime) {
 		auto playerPosition = player.getComponent<PositionComponent>("Position");
-
+		
 		if (!playerPosition) return;
 
+		
+
 		for (auto& enemy : enemies) {
+			auto playerComponent = enemy.getComponent<PlayerComponent>("Player");
+			if (playerComponent)
+				continue;
 			auto enemyPosition = enemy.getComponent<PositionComponent>("Position");
 			auto shootComponent = enemy.getComponent<ShootingComponent>("Shooting");
 			auto audioComponent = enemy.getComponent<AudioComponent>("Audio");
@@ -19,6 +24,8 @@ public:
 				if (audioComponent)
 					audioComponent->play("Shoot");
 				shootComponent->resetCooldown();
+
+				
 			}
 
 			shootComponent->updateCooldown(deltaTime);

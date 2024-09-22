@@ -55,19 +55,19 @@ int main()
 	auto collisionComponent = std::make_shared<CollisionComponent>();
 	collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
 	auto healthComponent = std::make_shared<HealthComponent>(100.f, 2.f);
+	auto playerComponent = std::make_shared<PlayerComponent>();
 
 	spriteComponent->sprite.setTexture(playerTexture);
+	playerEntity.id = 1;
 	playerEntity.addComponent("Position", positionComponent);
 	playerEntity.addComponent("Sprite", spriteComponent);
 	playerEntity.addComponent("Velocity", velocityComponent);
 	playerEntity.addComponent("Input", inputComponent);
 	playerEntity.addComponent("Collision", collisionComponent);
 	playerEntity.addComponent("Health", healthComponent);
+	playerEntity.addComponent("Player", playerComponent);
 
 	std::vector<Entity> entities = { playerEntity };
-
-	std::vector<Entity> enemies;
-
 
 	EventQueue eventQueue;
 
@@ -77,8 +77,8 @@ int main()
 	RenderSystem renderSystem;
 
 	ReticleSystem reticleSystem;
-	CollisionSystem collisionSystem;
-	HealthSystem healthSystem;
+	CollisionSystem collisionSystem(eventQueue);
+	HealthSystem healthSystem(eventQueue, entities);
 	MovementSystem movementSystem;
 
 	BulletFactory bulletFactory(enemyBulletTexture);
@@ -103,23 +103,27 @@ int main()
 				window.close();
 		}
 		inputSystem.update(window, entities, bulletFactory.playerBullets);
-		enemyShootingSystem.update(playerEntity, enemies, bulletFactory, dt.asSeconds());
-		movementSystem.update(enemies, dt.asSeconds());
+		enemyShootingSystem.update(playerEntity, entities, bulletFactory, dt.asSeconds());
+		movementSystem.update(entities, dt.asSeconds());
 
 		bulletSystem.update(dt.asSeconds());
 		physicsSystem.update(dt.asSeconds(), entities);
 		reticleSystem.update(window, reticle);
-		collisionSystem.checkPlayerEnemyCollisions(playerEntity, enemies, dt.asSeconds());
+		collisionSystem.checkPlayerEnemyCollisions(playerEntity, entities, dt.asSeconds());
 		collisionSystem.updateEnemyBullets(playerEntity, bulletFactory.enemyBullets);
-		collisionSystem.updatePlayerBullets(bulletFactory.playerBullets, enemies);
-		healthSystem.update(entities, enemies);
-		if (enemies.size() <= 0)
-			SpawnEnemy(window, enemies, enemyTexture);
+		collisionSystem.updatePlayerBullets(bulletFactory.playerBullets, entities);
+		healthSystem.update();
+		
+		if (entities.size() <= 1)
+			SpawnEnemy(window, entities, enemyTexture);
 		window.clear();
+
+		eventQueue.clearProcessedEvents();
+
 		renderSystem.update(window, entities);
 		renderSystem.update(window, bulletFactory.playerBullets);
 		renderSystem.update(window, bulletFactory.enemyBullets);
-		renderSystem.update(window, enemies);
+		renderSystem.update(window, entities);
 		renderSystem.drawReticle(window, reticle);
 
 		ui.draw(window);
@@ -153,7 +157,7 @@ Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float heal
 	spriteComponent->sprite.setTexture(texture);
 	auto collisionComponent = std::make_shared<CollisionComponent>();
 	collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
-	auto healthComponent = std::make_shared<HealthComponent>(20.f, 0.f);
+	auto healthComponent = std::make_shared<HealthComponent>(1000.f, 0.f);
 
 
 	auto shootingComponent = std::make_shared<ShootingComponent>(2.f);
@@ -178,7 +182,7 @@ Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float heal
 	return enemy;
 }
 
-void SpawnEnemy(const sf::Window& window, std::vector<Entity>& enemies, sf::Texture& texture)
+void SpawnEnemy(const sf::Window& window, std::vector<Entity>& entities, sf::Texture& texture)
 {
 	// Spawn an enemy at a random position
 	for (int i = 0; i < 5; ++i)
@@ -186,13 +190,13 @@ void SpawnEnemy(const sf::Window& window, std::vector<Entity>& enemies, sf::Text
 		auto enemy = createEnemyEntity(texture, { 0,0 }, 100.0f);
 		auto spriteComponent = enemy.getComponent<SpriteComponent>("Sprite");
 		auto positionComponent = enemy.getComponent<PositionComponent>("Position");
-		
+		enemy.id = i + 2;
 		// 1. Generate random position within the window's bounds
 		float randomX = static_cast<float>(std::rand() % (window.getSize().x - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().x)));
 		float randomY = static_cast<float>(std::rand() % (window.getSize().y - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().y)));
 
 		positionComponent->position = { randomX, randomY };
 
-		enemies.push_back(enemy);
+		entities.push_back(enemy);
 	}
 }
