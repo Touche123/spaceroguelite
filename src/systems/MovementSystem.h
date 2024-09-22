@@ -4,8 +4,8 @@
 
 class MovementSystem {
 public:
-	void update(std::vector<Entity>& entities, float dt) {
-		for (auto& e : entities) {
+	void update(EntitySystem entitySystem, float dt) {
+		for (auto& e : entitySystem.GetEntities()) {
 			auto velocityComponent = e.getComponent<VelocityComponent>("Velocity");
 			auto postionComponent = e.getComponent<PositionComponent>("Position");
 			auto movementBehavior = e.getComponent<BehaviorComponent>("MovementBehavior");

@@ -9,7 +9,7 @@ public:
 	{
 	}
 
-	void checkPlayerEnemyCollisions(Entity& player, std::vector<Entity>& enemies, float deltaTime)
+	void checkPlayerEnemyCollisions(Entity& player, EntitySystem entitySystem, float deltaTime)
 	{
 		auto playerCollision = player.getComponent<CollisionComponent>("Collision");
 		auto healthComponent = player.getComponent<HealthComponent>("Health");
@@ -21,7 +21,7 @@ public:
 
 		healthComponent->updateCooldown(deltaTime); // Update the player's cooldown timer
 
-		for (const auto& enemy : enemies)
+		for (const auto& enemy : entitySystem.GetEntities())
 		{
 			auto playerComponent = enemy.getComponent<PlayerComponent>("Player");
 			if (playerComponent)
@@ -61,7 +61,7 @@ public:
 				{
 					Event damageEvent;
 					damageEvent.type = EventType::DamageEntity;
-					damageEvent.data = DamageEntityEventData{ playerEntity.id, 10.f };
+					damageEvent.data = DamageEntityEventData{ playerEntity.getId(), 10.f};
 					// Post a damage entity event
 					eventQueue.addEvent(damageEvent);
 					//healthComponent->takeDamage(10.0f);
@@ -78,7 +78,7 @@ public:
 		}
 	}
 
-	void updatePlayerBullets(std::vector<Entity>& playerBullets, std::vector<Entity>& enemies)
+	void updatePlayerBullets(std::vector<Entity>& playerBullets, EntitySystem entitySystem)
 	{
 		for (auto it = playerBullets.begin(); it != playerBullets.end();)
 		{
@@ -93,7 +93,7 @@ public:
 
 			bool bulletHit = false;
 
-			for (auto& enemy : enemies)
+			for (auto& enemy : entitySystem.GetEntities())
 			{
 				auto enemyPosition = enemy.getComponent<PositionComponent>("Position");
 				auto enemySprite = enemy.getComponent<SpriteComponent>("Sprite");
@@ -108,10 +108,9 @@ public:
 
 					if (healthComponent)
 					{
-						std::cout << enemy.id << std::endl;
 						Event damageEvent;
 						damageEvent.type = EventType::DamageEntity;
-						damageEvent.data = DamageEntityEventData{ enemy.id, 5.f };
+						damageEvent.data = DamageEntityEventData{ enemy.getId(), 5.f};
 						// Post a damage entity event
 						eventQueue.addEvent(damageEvent);
 

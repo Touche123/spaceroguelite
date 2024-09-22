@@ -4,8 +4,8 @@
 
 class HealthSystem {
 public:
-    HealthSystem(EventQueue& eventQueue, std::vector<Entity>& entities)
-        : eventQueue(eventQueue), entities(entities)
+    HealthSystem(EventQueue& eventQueue, EntitySystem& entitySystem)
+        : eventQueue(eventQueue), entitySystem(entitySystem)
     {
     }
     void processEvents()
@@ -19,18 +19,12 @@ public:
             {
                 if (auto* damageEntityData = std::get_if<DamageEntityEventData>(&event.data))
                 {
-                    
-
                     int id = damageEntityData->entityId;
-                    auto it = std::find_if(entities.begin(), entities.end(),
-                        [id](const Entity& entity) {
-                            return entity.id == id;
-                        });
+                    Entity* e = entitySystem.getEntityById(id);
 
-                    if (it != entities.end())
-                    {
-                        it->getComponent<HealthComponent>("Health")->takeDamage(damageEntityData->damageAmount);
-                    }
+                    if (e != nullptr)
+                        e->getComponent<HealthComponent>("Health")->takeDamage(damageEntityData->damageAmount);
+                    
                     // Create and add a new bullet based on the event data
                     //bulletFactory.createPlayerBullets(fireBulletData->position, fireBulletData->direction, 400.f);
 
@@ -43,31 +37,16 @@ public:
     void update()
     {
         processEvents();
-        for (auto it = entities.begin(); it != entities.end();) {
-            auto healthComponent = it->getComponent<HealthComponent>("Health");
+        for (auto& entity : entitySystem.GetEntities()) {
+            auto healthComponent = entity.getComponent<HealthComponent>("Health");
             if (healthComponent && healthComponent->isDead())
             {
                 // Remove the dead enemy from the game
-                it = entities.erase(it);
-            } else
-            {
-                ++it;
-            }
-        }
-
-        for (auto it = entities.begin(); it != entities.end();) {
-            auto healthComponent = it->getComponent<HealthComponent>("Health");
-            if (healthComponent && healthComponent->isDead())
-            {
-                // Remove the dead enemy from the game
-                it = entities.erase(it);
-            } else
-            {
-                ++it;
+                entitySystem.markForRemoval(entity.getId());
             }
         }
     }
 private:
     EventQueue& eventQueue;
-    std::vector<Entity>& entities;
+    EntitySystem& entitySystem;
 };

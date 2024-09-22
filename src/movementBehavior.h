@@ -4,12 +4,12 @@
 class IMovementBehavior {
 public:
 	virtual ~IMovementBehavior() = default;
-	virtual void update(Entity& entity, float deltaTime) = 0;
+	virtual void update(const Entity& entity, float deltaTime) = 0;
 };
 
 class StraighLineMovement : public IMovementBehavior {
 public:
-	void update(Entity& e, float dt) override {
+	void update(const Entity& e, float dt) override {
 		auto velocityComponent = e.getComponent<VelocityComponent>("Velocity");
 		if (velocityComponent) {
 			velocityComponent->velocity.y += 100.0f * dt;
@@ -24,7 +24,7 @@ private:
 public:
 	FollowPlayerMovement(Entity& playerEntity) : player(playerEntity) {}
 
-	void update(Entity& e, float dt) override {
+	void update(const Entity& e, float dt) override {
 		auto velocityComponent = e.getComponent<VelocityComponent>("Velocity");
 		auto playerPosition = player.getComponent<PositionComponent>("Position");
 		auto enemyPosition = e.getComponent<PositionComponent>("Position");

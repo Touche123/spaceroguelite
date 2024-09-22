@@ -17,6 +17,7 @@
 #include "src/systems/enemyShootingSystem.h"
 #include "src/movementBehavior.h"
 #include "src/systems/MovementSystem.h"
+#include "src/systems/entitySystem.h"
 
 sf::Clock deltaClock;
 sf::Time dt;
@@ -24,7 +25,8 @@ sf::Time dt;
 Entity createReticleEntity(sf::Texture& reticleTexture);
 Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float health);
 Entity playerEntity;
-void SpawnEnemy(const sf::Window& window, std::vector<Entity>& enemies, sf::Texture& texture);
+
+void SpawnEnemy(const sf::Window& window, EntitySystem& entitySystem, sf::Texture& texture);
 
 int main()
 {
@@ -48,17 +50,18 @@ int main()
 
 	Entity reticle = createReticleEntity(reticleTexture);
 	
+	EntitySystem entitySystem;
+
 	auto positionComponent = std::make_shared<PositionComponent>();
 	auto velocityComponent = std::make_shared<VelocityComponent>();
 	auto inputComponent = std::make_shared<InputComponent>();
 	auto spriteComponent = std::make_shared<SpriteComponent>();
 	auto collisionComponent = std::make_shared<CollisionComponent>();
 	collisionComponent->bounds = spriteComponent->sprite.getGlobalBounds();
-	auto healthComponent = std::make_shared<HealthComponent>(100.f, 2.f);
+	auto healthComponent = std::make_shared<HealthComponent>(10000.f, 2.f);
 	auto playerComponent = std::make_shared<PlayerComponent>();
 
 	spriteComponent->sprite.setTexture(playerTexture);
-	playerEntity.id = 1;
 	playerEntity.addComponent("Position", positionComponent);
 	playerEntity.addComponent("Sprite", spriteComponent);
 	playerEntity.addComponent("Velocity", velocityComponent);
@@ -67,7 +70,9 @@ int main()
 	playerEntity.addComponent("Health", healthComponent);
 	playerEntity.addComponent("Player", playerComponent);
 
-	std::vector<Entity> entities = { playerEntity };
+	//std::vector<Entity> entities = { playerEntity };
+
+	entitySystem.AddEntity(playerEntity);
 
 	EventQueue eventQueue;
 
@@ -78,7 +83,7 @@ int main()
 
 	ReticleSystem reticleSystem;
 	CollisionSystem collisionSystem(eventQueue);
-	HealthSystem healthSystem(eventQueue, entities);
+	HealthSystem healthSystem(eventQueue, entitySystem);
 	MovementSystem movementSystem;
 
 	BulletFactory bulletFactory(enemyBulletTexture);
@@ -102,25 +107,27 @@ int main()
 				sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::Escape))
 				window.close();
 		}
-		inputSystem.update(window, entities, bulletFactory.playerBullets);
-		enemyShootingSystem.update(playerEntity, entities, bulletFactory, dt.asSeconds());
-		movementSystem.update(entities, dt.asSeconds());
+		inputSystem.update(window, entitySystem, bulletFactory.playerBullets);
+		enemyShootingSystem.update(playerEntity, entitySystem, bulletFactory, dt.asSeconds());
+		movementSystem.update(entitySystem, dt.asSeconds());
 
 		bulletSystem.update(dt.asSeconds());
-		physicsSystem.update(dt.asSeconds(), entities);
+		physicsSystem.update(dt.asSeconds(), entitySystem);
 		reticleSystem.update(window, reticle);
-		collisionSystem.checkPlayerEnemyCollisions(playerEntity, entities, dt.asSeconds());
+		collisionSystem.checkPlayerEnemyCollisions(playerEntity, entitySystem, dt.asSeconds());
 		collisionSystem.updateEnemyBullets(playerEntity, bulletFactory.enemyBullets);
-		collisionSystem.updatePlayerBullets(bulletFactory.playerBullets, entities);
+		collisionSystem.updatePlayerBullets(bulletFactory.playerBullets, entitySystem);
 		healthSystem.update();
+
+		entitySystem.remove_marked_for_removal();
 		
-		if (entities.size() <= 1)
-			SpawnEnemy(window, entities, enemyTexture);
+		if (entitySystem.GetEntitiesCount() <= 1)
+			SpawnEnemy(window, entitySystem, enemyTexture);
 		window.clear();
 
 		eventQueue.clearProcessedEvents();
 
-		renderSystem.update(window, entities);
+		renderSystem.update(window, entitySystem);
 		renderSystem.update(window, bulletFactory.playerBullets);
 		renderSystem.update(window, bulletFactory.enemyBullets);
 		renderSystem.drawReticle(window, reticle);
@@ -181,7 +188,7 @@ Entity createEnemyEntity(sf::Texture& texture, sf::Vector2f position, float heal
 	return enemy;
 }
 
-void SpawnEnemy(const sf::Window& window, std::vector<Entity>& entities, sf::Texture& texture)
+void SpawnEnemy(const sf::Window& window, EntitySystem& entitySystem, sf::Texture& texture)
 {
 	// Spawn an enemy at a random position
 	for (int i = 0; i < 5; ++i)
@@ -189,13 +196,13 @@ void SpawnEnemy(const sf::Window& window, std::vector<Entity>& entities, sf::Tex
 		auto enemy = createEnemyEntity(texture, { 0,0 }, 100.0f);
 		auto spriteComponent = enemy.getComponent<SpriteComponent>("Sprite");
 		auto positionComponent = enemy.getComponent<PositionComponent>("Position");
-		enemy.id = i + 2;
+		
 		// 1. Generate random position within the window's bounds
 		float randomX = static_cast<float>(std::rand() % (window.getSize().x - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().x)));
 		float randomY = static_cast<float>(std::rand() % (window.getSize().y - static_cast<int>(spriteComponent->sprite.getGlobalBounds().getSize().y)));
 
 		positionComponent->position = { randomX, randomY };
 
-		entities.push_back(enemy);
+		entitySystem.AddEntity(enemy);
 	}
 }

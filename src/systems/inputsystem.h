@@ -4,13 +4,14 @@
 #include "src/entity.h"
 #include "../eventqueue.h"
 #include "combatsystem.h"
+#include "entitySystem.h"
 
 class InputSystem {
 public:
 	InputSystem(EventQueue& eventQueue, CombatSystem& combatSystem) 
 		: eventQueue(eventQueue), combatSystem(combatSystem) {}
-	void update(sf::RenderWindow& window, std::vector<Entity>& entities, std::vector<Entity>& bullets) {
-		for (auto& entity : entities) {
+	void update(sf::RenderWindow& window, EntitySystem entitySystem, std::vector<Entity>& bullets) {
+		for (auto& entity : entitySystem.GetEntities()) {
 			auto inputComponent = entity.getComponent<InputComponent>("Input");
 			auto velocityComponent = entity.getComponent<VelocityComponent>("Velocity");
 			auto positionComponent = entity.getComponent<PositionComponent>("Position");

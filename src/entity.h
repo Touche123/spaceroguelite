@@ -128,7 +128,8 @@ struct HealthComponent {
 
 class Entity {
 public:
-	int id;
+	friend class EntitySystem;
+	bool marked_for_removal = false;
 	std::unordered_map<std::string, std::shared_ptr<void>> components;
 
 	template<typename T>
@@ -145,4 +146,9 @@ public:
 		}
 		return nullptr;  // Component not found
 	}
+
+	int getId() const { return id; }
+
+private:
+	int id;
 };

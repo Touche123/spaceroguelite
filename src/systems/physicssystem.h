@@ -3,8 +3,8 @@
 
 class PhysicsSystem {
 public:
-	void update(float deltaTime, std::vector<Entity>& entities) {
-		for (auto& entity : entities) {
+	void update(float deltaTime, EntitySystem entitySystem) {
+		for (auto& entity : entitySystem.GetEntities()) {
 			auto positionComponent = entity.getComponent<PositionComponent>("Position");
 			auto velocityComponent = entity.getComponent<VelocityComponent>("Velocity");
 

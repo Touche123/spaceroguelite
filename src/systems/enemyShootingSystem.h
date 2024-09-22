@@ -4,14 +4,14 @@
 
 class EnemyShootingSystem {
 public:
-	void update(Entity& player, std::vector<Entity>& enemies, BulletFactory& bulletFactory, float deltaTime) {
+	void update(Entity& player, EntitySystem entitySystem, BulletFactory& bulletFactory, float deltaTime) {
 		auto playerPosition = player.getComponent<PositionComponent>("Position");
 		
 		if (!playerPosition) return;
 
 		
 
-		for (auto& enemy : enemies) {
+		for (auto& enemy : entitySystem.GetEntities()) {
 			auto playerComponent = enemy.getComponent<PlayerComponent>("Player");
 			if (playerComponent)
 				continue;
@@ -28,7 +28,8 @@ public:
 				
 			}
 
-			shootComponent->updateCooldown(deltaTime);
+			if (shootComponent)
+				shootComponent->updateCooldown(deltaTime);
 		}
 	}
 

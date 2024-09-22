@@ -150,6 +150,7 @@
     <ClInclude Include="src\systems\enemyShootingSystem.h" />
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\eventqueue.h" />
+    <ClInclude Include="src\systems\entitySystem.h" />
     <ClInclude Include="src\systems\healthSystem.h" />
     <ClInclude Include="src\systems\inputsystem.h" />
     <ClInclude Include="src\item.h" />
