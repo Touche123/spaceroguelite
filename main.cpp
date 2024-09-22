@@ -123,7 +123,6 @@ int main()
 		renderSystem.update(window, entities);
 		renderSystem.update(window, bulletFactory.playerBullets);
 		renderSystem.update(window, bulletFactory.enemyBullets);
-		renderSystem.update(window, entities);
 		renderSystem.drawReticle(window, reticle);
 
 		ui.draw(window);

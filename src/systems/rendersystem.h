@@ -4,6 +4,23 @@
 
 class RenderSystem {
 public:
+	void update(sf::RenderWindow& window, const Entity& entity)
+	{
+		auto spriteComponent = entity.getComponent<SpriteComponent>("Sprite");
+		auto positionComponent = entity.getComponent<PositionComponent>("Position");
+		auto collisionComponent = entity.getComponent<CollisionComponent>("Collision");
+		if (spriteComponent && positionComponent)
+		{
+			spriteComponent->sprite.setPosition(positionComponent->position);
+
+			if (collisionComponent)
+			{
+				collisionComponent->updateBounds(spriteComponent->sprite);
+			}
+			window.draw(spriteComponent->sprite);
+		}
+	}
+
 	void update(sf::RenderWindow& window, const std::vector<Entity>& entities) {
 		SpriteComponent spr;
 		for (const auto& entity : entities) {
