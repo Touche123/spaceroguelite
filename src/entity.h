@@ -29,7 +29,7 @@ struct VelocityComponent {
 };
 
 struct InputComponent {
-	sf::Vector2f movementDirection; // A vector to track input.
+	sf::Vector2f movement_direction; // A vector to track input.
 	bool isFiring = false;
 };
 
@@ -42,23 +42,23 @@ struct PlayerComponent {
 };
 
 struct ShootingComponent {
-	float shootCooldown;
-	float timeSinceLastShot;
+	float shoot_cooldown;
+	float time_since_last_shot;
 
 	ShootingComponent(float cooldown)
-		: shootCooldown(cooldown), timeSinceLastShot(0.0f) {}
+		: shoot_cooldown(cooldown), time_since_last_shot(0.0f) {}
 
 	bool canShoot() const {
-		return timeSinceLastShot >= shootCooldown;
+		return time_since_last_shot >= shoot_cooldown;
 	}
 
 	void resetCooldown() {
-		timeSinceLastShot = 0.0f;
+		time_since_last_shot = 0.0f;
 	}
 
 	void updateCooldown(float deltaTime) {
-		if (timeSinceLastShot < shootCooldown) {
-			timeSinceLastShot += deltaTime;
+		if (time_since_last_shot < shoot_cooldown) {
+			time_since_last_shot += deltaTime;
 		}
 	}
 };
@@ -71,15 +71,15 @@ struct BehaviorComponent {
 };
 
 struct AudioComponent {
-	std::map<std::string, sf::SoundBuffer> soundBuffers;
+	std::map<std::string, sf::SoundBuffer> sound_buffers;
 	std::map<std::string, sf::Sound> sounds;
 
 	bool loadSound(const std::string& name, const std::string filename) {
 		sf::SoundBuffer buffer;
 		if (buffer.loadFromFile(filename)) {
-			soundBuffers[name] = buffer;
+			sound_buffers[name] = buffer;
 			sounds[name] = sf::Sound();
-			sounds[name].setBuffer(soundBuffers[name]);
+			sounds[name].setBuffer(sound_buffers[name]);
 			return true;
 		}
 		return false;
@@ -94,12 +94,12 @@ struct AudioComponent {
 
 struct HealthComponent {
 	float health;
-	float damageCooldown;
-	float timeSinceLastHit;
+	float damage_cooldown;
+	float time_since_last_hit;
 	std::function<void()> onDeath;
 
 	HealthComponent(float initialHealth, float cooldown) 
-		: health(initialHealth), damageCooldown(cooldown), timeSinceLastHit(0.0f) {}
+		: health(initialHealth), damage_cooldown(cooldown), time_since_last_hit(0.0f) {}
 
 	void takeDamage(float amount) {
 		health -= amount;
@@ -109,11 +109,11 @@ struct HealthComponent {
 			if (onDeath)
 				onDeath();
 		}
-		timeSinceLastHit = 0.0f;
+		time_since_last_hit = 0.0f;
 	}
 
 	bool canTakeDamage() const {
-		return timeSinceLastHit >= damageCooldown;
+		return time_since_last_hit >= damage_cooldown;
 	}
 
 	bool isDead() const {
@@ -121,8 +121,8 @@ struct HealthComponent {
 	}
 
 	void updateCooldown(float deltaTime) {
-		if (timeSinceLastHit < damageCooldown)
-			timeSinceLastHit += deltaTime;
+		if (time_since_last_hit < damage_cooldown)
+			time_since_last_hit += deltaTime;
 	}
 };
 
